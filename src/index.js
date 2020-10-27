@@ -26,7 +26,8 @@ const init = () => {
     document.body.classList.add(classNameForLoading);
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111111);
+    // scene.background = new THREE.Color(0xff5b01);
+    scene.background = new THREE.Color(0xff5b01);
 
     renderer = new THREE.WebGLRenderer();
     document.getElementById("content").appendChild(renderer.domElement);
@@ -46,8 +47,10 @@ const init = () => {
     } : null);
 
     if (navigator.mediaDevices) {
-        initAudio();
-        initVideo();
+        document.getElementById('button').addEventListener('click', () => {
+            initVideo();
+            initAudio();
+        });
     } else {
         showAlert();
     }
@@ -73,7 +76,6 @@ const initVideo = () => {
 
     const option = {
         video: true,
-        audio: false
     };
     navigator.mediaDevices.getUserMedia(option)
         .then((stream) => {
@@ -93,29 +95,12 @@ const initVideo = () => {
 
 const initAudio = () => {
     const audioListener = new THREE.AudioListener();
-    audio = new THREE.Audio(audioListener);
-
-    const audioLoader = new THREE.AudioLoader();
-    // https://www.newgrounds.com/audio/listen/232941
-    audioLoader.load('asset/232941_New.MP3', (buffer) => {
-        document.body.classList.remove(classNameForLoading);
-
-        audio.setBuffer(buffer);
-        audio.setLoop(true);
-        audio.setVolume(0.5);
-        audio.play();
-    });
-
-    analyser = new THREE.AudioAnalyser(audio, fftSize);
-
-    document.body.addEventListener('click', function () {
-        if (audio) {
-            if (audio.isPlaying) {
-                audio.pause();
-            } else {
-                audio.play();
-            }
-        }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        audio = new THREE.Audio(audioListener);
+        analyser = new THREE.AudioAnalyser(audio, fftSize);
+        const context = audioListener.context;
+        const microphone = context.createMediaStreamSource(stream);
+        audio.setNodeSource(microphone);
     });
 };
 
@@ -124,8 +109,8 @@ const createParticles = () => {
     const geometry = new THREE.Geometry();
     geometry.morphAttributes = {};  // This is necessary to avoid error.
     const material = new THREE.PointsMaterial({
-        size: 1,
-        color: 0xff3b6c,
+        size: 2,
+        color: 0xffffff,
         sizeAttenuation: false
     });
 
@@ -207,9 +192,9 @@ const draw = (t) => {
 
     // video
     if (particles) {
-        particles.material.color.r = 1 - r;
-        particles.material.color.g = 1 - g;
-        particles.material.color.b = 1 - b;
+        // particles.material.color.r = 1 - r;
+        // particles.material.color.g = 1 - g;
+        // particles.material.color.b = 1 - b;
 
         const density = 2;
         const useCache = parseInt(t) % 2 === 0;  // To reduce CPU usage.
